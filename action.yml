@@ -1,0 +1,62 @@
+---
+name: K8S Setup
+description: Prepare kubectl for communication with a cluster
+inputs:
+  vendor:
+    description: The vendor to communicate with (digitalocean, scaleway)
+    required: true
+  cluster-id:
+    description: Target cluster ID
+    required: true
+  # Vendor: DigitalOcean
+  digitalocean-api-token:
+    description: DigitalOcean API token
+    required: false
+  # Vendor: Scaleway
+  scaleway-organization-id:
+    description: Scaleway organization ID
+    required: false
+  scaleway-project-id:
+    description: Scaleway project ID
+    required: false
+  scaleway-region:
+    description: Scaleway deployment region (such as nl-ams)
+    required: false
+  scaleway-access-key:
+    description: Scaleway API key ID
+    required: false
+  scaleway-secret-key:
+    description: Scaleway API key secret
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Install scw tool
+      if: ${{ inputs.vendor == 'scaleway' }}
+      uses: scaleway/action-scw@v0
+      with:
+        access-key: ${{ inputs.scaleway-access-key }}
+        secret-key: ${{ inputs.scaleway-secret-key }}
+        default-organization-id: ${{ inputs.scaleway-organization-id }}
+        default-project-id: ${{ inputs.scaleway-project-id }}
+        export-config: true
+        save-config: true
+    - name: Install doctl tool
+      if: ${{ inputs.vendor == 'digitalocean' }}
+      uses: digitalocean/action-doctl@v2
+      with:
+        token: ${{ inputs.digitalocean-api-token }}
+    - name: Save kubeconfig
+      shell: bash
+      run: |
+        case "${{ inputs.vendor }}" in
+          scaleway)
+            scw k8s kubeconfig install ${{ inputs.cluster-id }} region=${{ inputs.scaleway-region }}
+            ;;
+          digitalocean)
+            doctl k8s cluster kubeconfig save ${{ inputs.cluster-id }}
+            ;;
+          *)
+            ;;
+        esac
