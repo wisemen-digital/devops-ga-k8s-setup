@@ -8,6 +8,13 @@ inputs:
   cluster-id:
     description: Target cluster ID
     required: true
+  # Vendor: Azure
+  azure-creds:
+    description: Json string for login with an Azure service principal
+    required: false
+  azure-resource-group:
+    description: Resource group name
+    required: false
   # Vendor: DigitalOcean
   digitalocean-api-token:
     description: DigitalOcean API token
@@ -32,6 +39,7 @@ inputs:
 runs:
   using: composite
   steps:
+  # Vendor: Scaleway
     - name: Install scw tool
       if: ${{ inputs.vendor == 'scaleway' }}
       uses: scaleway/action-scw@v0
@@ -42,21 +50,37 @@ runs:
         default-project-id: ${{ inputs.scaleway-project-id }}
         export-config: true
         save-config: true
+    - name: Save Scaleway kubeconfig
+      if: ${{ inputs.vendor == 'scaleway' }}
+      shell: bash
+      run: scw k8s kubeconfig install ${{ inputs.cluster-id }} region=${{ inputs.scaleway-region }}
+
+  # Vendor: Digitalocean
     - name: Install doctl tool
       if: ${{ inputs.vendor == 'digitalocean' }}
       uses: digitalocean/action-doctl@v2
       with:
         token: ${{ inputs.digitalocean-api-token }}
-    - name: Save kubeconfig
+    - name: Save DigitalOcean kubeconfig
+      if: ${{ inputs.vendor == 'digitalocean' }}
       shell: bash
-      run: |
-        case "${{ inputs.vendor }}" in
-          scaleway)
-            scw k8s kubeconfig install ${{ inputs.cluster-id }} region=${{ inputs.scaleway-region }}
-            ;;
-          digitalocean)
-            doctl k8s cluster kubeconfig save ${{ inputs.cluster-id }}
-            ;;
-          *)
-            ;;
-        esac
+      run: doctl k8s cluster kubeconfig save ${{ inputs.cluster-id }}
+
+  # Vendor: Azure
+    - name: Set up kubelogin for non-interactive login
+      uses: azure/use-kubelogin@v1
+      with:
+        kubelogin-version: 'v0.1.7'
+    - name: Azure login
+      if: ${{ inputs.vendor == 'azure' }}
+      uses: azure/login@v2
+      with:
+        creds: ${{ inputs.azure-creds }}
+    - name: Save Azure kubeconfig
+      if: ${{ inputs.vendor == 'azure' }}
+      uses: azure/aks-set-context@v4
+      with:
+        resource-group: ${{ inputs.azure-resource-group}}
+        cluster-name: ${{ inputs.cluster-id }}
+        admin: 'false'
+        use-kubelogin: 'true'
