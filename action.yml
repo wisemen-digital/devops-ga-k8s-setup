@@ -39,7 +39,7 @@ inputs:
 runs:
   using: composite
   steps:
-  # Vendor: Scaleway
+    # Vendor: Scaleway
     - name: Install scw tool
       if: ${{ inputs.vendor == 'scaleway' }}
       uses: scaleway/action-scw@v0
@@ -55,7 +55,7 @@ runs:
       shell: bash
       run: scw k8s kubeconfig install ${{ inputs.cluster-id }} region=${{ inputs.scaleway-region }}
 
-  # Vendor: Digitalocean
+    # Vendor: Digitalocean
     - name: Install doctl tool
       if: ${{ inputs.vendor == 'digitalocean' }}
       uses: digitalocean/action-doctl@v2
@@ -66,7 +66,7 @@ runs:
       shell: bash
       run: doctl k8s cluster kubeconfig save ${{ inputs.cluster-id }}
 
-  # Vendor: Azure
+    # Vendor: Azure
     - name: Set up kubelogin for non-interactive login
       uses: azure/use-kubelogin@v1
       with:
