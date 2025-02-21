@@ -75,7 +75,7 @@ runs:
       if: ${{ inputs.vendor == 'azure' }}
       uses: azure/login@v2
       with:
-        creds: ${{ inputs.azure-creds }}
+        creds: ${{ inputs.azure-credentials }}
     - name: Save Azure kubeconfig
       if: ${{ inputs.vendor == 'azure' }}
       uses: azure/aks-set-context@v4
