@@ -9,7 +9,7 @@ inputs:
     description: Target cluster ID
     required: true
   # Vendor: Azure
-  azure-creds:
+  azure-credentials:
     description: Json string for login with an Azure service principal
     required: false
   azure-resource-group:
