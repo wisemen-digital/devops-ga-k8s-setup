@@ -68,6 +68,7 @@ runs:
 
     # Vendor: Azure
     - name: Set up kubelogin for non-interactive login
+      if: ${{ inputs.vendor == 'azure' }}
       uses: azure/use-kubelogin@v1
       with:
         kubelogin-version: 'latest'
