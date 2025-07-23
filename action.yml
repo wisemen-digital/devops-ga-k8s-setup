@@ -50,6 +50,7 @@ runs:
         default-project-id: ${{ inputs.scaleway-project-id }}
         export-config: true
         save-config: true
+        version: v2.42.0
     - name: Save Scaleway kubeconfig
       if: ${{ inputs.vendor == 'scaleway' }}
       shell: bash
