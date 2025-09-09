@@ -71,7 +71,9 @@ runs:
       if: ${{ inputs.vendor == 'azure' }}
       uses: azure/use-kubelogin@v1
       with:
-        kubelogin-version: 'v0.1.9'
+        kubelogin-version: 'latest'
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
     - name: Azure login
       if: ${{ inputs.vendor == 'azure' }}
       uses: azure/login@v2
